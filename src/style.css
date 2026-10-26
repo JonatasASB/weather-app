@@ -57,15 +57,18 @@ input {
 }
 
 /* Topo: busca sem fundo próprio, alinhada ao card */
+/* Se não couber na mesma linha, o botão desce com largura total (PRD §5.5):
+   o input fica com quase todo o espaço livre, e o botão só cresce quando está sozinho. */
 .search {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   max-width: 800px;
   margin: 0 auto 24px;
 }
 
 .search__input {
-  flex: 1;
+  flex: 999 1 200px;
   min-width: 0;
   height: 48px;
   padding: 0 16px;
@@ -73,13 +76,23 @@ input {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
+  transition:
+    border-color 180ms ease,
+    outline-color 180ms ease,
+    outline-offset 180ms ease,
+    opacity 180ms ease;
 }
 
 .search__input::placeholder {
   color: var(--color-text-muted);
 }
 
+.search__input:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
 .search__button {
+  flex: 1 0 auto;
   height: 48px;
   padding: 0 24px;
   border: none;
@@ -88,6 +101,15 @@ input {
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    outline-color 180ms ease,
+    outline-offset 180ms ease,
+    opacity 180ms ease;
+}
+
+.search__button:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 .search__input:focus-visible,
@@ -156,6 +178,16 @@ input {
 /* Estado de sucesso (PRD §5.1, §5.3, §5.4) */
 .weather {
   display: flex;
+  animation: fade-in 200ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .sidebar {
@@ -227,8 +259,9 @@ input {
 
 .metric__value {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  column-gap: 12px;
   font-size: 24px;
   font-weight: 600;
 }
@@ -236,4 +269,36 @@ input {
 .metric__arrow {
   display: inline-block;
   color: var(--color-primary);
+}
+
+/* Mobile (PRD §5.5) */
+@media (max-width: 639.98px) {
+  .page {
+    padding: 16px;
+  }
+
+  .weather {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .metrics {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+}
+
+/* Movimento reduzido (PRD §5.6): sem animações nem transições; o spinner fica estático. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
