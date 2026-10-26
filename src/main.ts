@@ -1,5 +1,7 @@
 import './style.css'
-import { renderEmpty } from './ui/states'
+import { getCurrentWeather, searchCity } from './services/openMeteo'
+import { renderEmpty, renderLoading, renderNotFound } from './ui/states'
+import { renderWeather } from './ui/weatherView'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -22,6 +24,47 @@ app.innerHTML = `
   </main>
 `
 
+const form = app.querySelector<HTMLFormElement>('.search')!
+const input = app.querySelector<HTMLInputElement>('.search__input')!
+const button = app.querySelector<HTMLButtonElement>('.search__button')!
 const content = app.querySelector<HTMLElement>('.card')!
+
+// Identifica a busca atual; respostas de buscas antigas são descartadas (RF04).
+let currentSearchId = 0
+
+function setSearching(searching: boolean): void {
+  input.disabled = searching
+  button.disabled = searching
+}
+
+async function handleSearch(query: string): Promise<void> {
+  const id = ++currentSearchId
+  renderLoading(content)
+
+  const city = await searchCity(query)
+  if (id !== currentSearchId) return
+  if (!city) return renderNotFound(content)
+
+  const weather = await getCurrentWeather(city.latitude, city.longitude, city.timezone)
+  if (id !== currentSearchId) return
+  if (!weather) return renderNotFound(content)
+
+  renderWeather(content, city, weather)
+}
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault()
+
+  const query = input.value.trim()
+  if (!query) return
+
+  setSearching(true)
+  try {
+    await handleSearch(query)
+  } finally {
+    setSearching(false)
+    input.focus()
+  }
+})
 
 renderEmpty(content)
