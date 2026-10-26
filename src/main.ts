@@ -1,4 +1,5 @@
 import './style.css'
+import { renderEmpty } from './ui/states'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -20,3 +21,7 @@ app.innerHTML = `
     <section class="card" aria-live="polite"></section>
   </main>
 `
+
+const content = app.querySelector<HTMLElement>('.card')!
+
+renderEmpty(content)
